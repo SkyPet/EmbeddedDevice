@@ -36,24 +36,26 @@ const rl = readline.createInterface({
 var passwordFileName='pswd.txt';
 var pswd=path.join(__dirname, passwordFileName);
 const testing=true;
-var datadir='--datadir "/home/eth/.ethereum"';
+//var datadir='--datadir "/home/eth/.ethereum"';
+var keystore=''
 if(testing){
-    datadir='--datadir "/home/eth/.ethereum/testnet"';
+    //datadir='--datadir "/home/eth/.ethereum/testnet"';
+    keystore='--keystore "/home/eth/.ethereum/testnet/keystore'
 }
 
 checkPswd();
 
 function checkPswd(){
-    exec('geth '+datadir+'  account list', (err, stdout, stderr)=>{
+    exec('geth '+keystore+'  account list', (err, stdout, stderr)=>{
         console.log(stdout);
         console.log(err);
-        /*if(err){
+        if(err){
             var value=uuid.v1();
             fs.writeFile(pswd, value, (err)=>{
                 if(err) {
                     return console.log(err);
                 }
-                exec('geth '+datadir+' --password '+passwordFileName+' account new', (err, stdout, stderr)=>{
+                exec('geth '+keystore+' --password '+passwordFileName+' account new', (err, stdout, stderr)=>{
                     if(err){
                         return console.log(err);
                     }
@@ -64,7 +66,7 @@ function checkPswd(){
         }
         else{
             runGeth();
-        }*/
+        }
     
     });
 }
