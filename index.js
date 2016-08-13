@@ -35,8 +35,9 @@ const rl = readline.createInterface({
 });
 var passwordFileName='pswd.txt';
 var pswd=path.join(__dirname, passwordFileName);
-checkPswd();
 const datadir='--datadir "/home/eth/.ethereum"';
+checkPswd();
+
 function checkPswd(){
     exec('geth '+datadir+' account list', (err, stdout, stderr)=>{
         console.log(stdout);
