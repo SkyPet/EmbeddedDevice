@@ -36,8 +36,9 @@ const rl = readline.createInterface({
 var passwordFileName='pswd.txt';
 var pswd=path.join(__dirname, passwordFileName);
 checkPswd();
+const datadir='--datadir "/home/eth/.ethereum"';
 function checkPswd(){
-    exec('geth account list', (err, stdout, stderr)=>{
+    exec('geth '+datadir+' account list', (err, stdout, stderr)=>{
         console.log(stdout);
         if(err){
             var value=uuid.v1();
@@ -45,7 +46,7 @@ function checkPswd(){
                 if(err) {
                     return console.log(err);
                 }
-                console.log('geth --password '+passwordFileName+' account new');
+                console.log('geth '+datadir+' --password '+passwordFileName+' account new');
                 exec('geth --password '+passwordFileName+' account new', (err, stdout, stderr)=>{
                     if(err){
                         return console.log(err);
@@ -63,7 +64,7 @@ function checkPswd(){
 }
 function runGeth(){
     var isOpen=false;
-    const geth = spawn( 'geth', [ '--rpc', '--rpccorsdomain=*', '--testnet', '--unlock=0', '--password='+passwordFileName, '--rpcapi="db,eth,net,web3,personal"', ' --rpcport="8545"', '--rpcaddr="localhost"', '--datadir="/home/eth/.ethereum"']); 
+    const geth = spawn( 'geth', [ '--rpc', '--rpccorsdomain=*', '--testnet', '--unlock=0', '--password='+passwordFileName, '--rpcapi="db,eth,net,web3,personal"', ' --rpcport="8545"', '--rpcaddr="localhost"', datadir]); 
     geth.stdout.on('data', data=>{
     });
     geth.stderr.on( 'data', data => { //for some reason Geth prints to stderr....
