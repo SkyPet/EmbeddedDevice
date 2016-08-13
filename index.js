@@ -46,7 +46,8 @@ checkPswd();
 function checkPswd(){
     exec('geth '+datadir+'  account list', (err, stdout, stderr)=>{
         console.log(stdout);
-        if(err){
+        console.log(err);
+        /*if(err){
             var value=uuid.v1();
             fs.writeFile(pswd, value, (err)=>{
                 if(err) {
@@ -63,7 +64,7 @@ function checkPswd(){
         }
         else{
             runGeth();
-        }
+        }*/
     
     });
 }
