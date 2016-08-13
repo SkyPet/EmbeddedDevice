@@ -40,7 +40,7 @@ const testing=true;
 var keystore=''
 if(testing){
     //datadir='--datadir "/home/eth/.ethereum/testnet"';
-    keystore='--keystore "/home/eth/.ethereum/testnet/keystore'
+    keystore='--keystore "/home/eth/.ethereum/testnet/keystore"'
 }
 
 checkPswd();
