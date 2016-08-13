@@ -38,7 +38,7 @@ var pswd=path.join(__dirname, passwordFileName);
 checkPswd();
 function checkPswd(){
     exec('geth account list', (err, stdout, stderr)=>{
-        console.log(err);
+        console.log(stdout);
         if(err){
             var value=uuid.v1();
             fs.writeFile(pswd, value, (err)=>{
