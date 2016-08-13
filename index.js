@@ -8,21 +8,26 @@ var SerialPort=require("serialport");
 var uuid = require('node-uuid');
 const WebSocketServer = require('ws').Server;
 const wss = new WebSocketServer({ port: 4000 });
-var web3=new Web3();
-
-app.use(express.static(path.join(__dirname, 'DPetEmbed/build'))); 
+const web3=new Web3();
 const port=3500;
-app.listen(port);
 const spawn = require( 'child_process' ).spawn;
 const exec = require( 'child_process' ).exec;
+const contractAddress='0x69De4ADbb566c1c68e8dB1274229adA4A3D9f8A8';
+const passwordFileName='pswd.txt';
+const testing=true;
+var contract;
 
-var address='';
+app.use(express.static(path.join(__dirname, 'DPetEmbed/build'))); 
+
+app.listen(port);
 wss.on('connection', (ws)=>{
-  ws.on('message', (message)=>{
-    console.log('received: %s', message);
-  });
-
-  ws.send(web3.eth.defaultAccount);
+    ws.on('message', (message)=>{
+        console.log(message);
+    });
+    ws.send(JSON.stringify({accounts:web3.eth.defaultAccount}));
+    ws.send(JSON.stringify({contractAddress:contractAddress}));
+    ws.send(JSON.stringify({cost:web3.fromWei(contract.costToAdd()).toString()}));
+    ws.send(JSON.stringify({moneyInAccount:web3.fromWei(web3.eth.getBalance(web3.eth.defaultAccount))}));
 });
 wss.broadcast = function(data) {
     wss.clients.forEach((client)=>{
@@ -30,19 +35,14 @@ wss.broadcast = function(data) {
     });
 };
 
-var passwordFileName='pswd.txt';
 var pswd=path.join(__dirname, passwordFileName);
-const testing=true;
 var datadir='--datadir "/home/eth/.ethereum"';
 var ipcpath='--ipcpath=/home/eth/.ethereum/geth.ipc';
-//var keystore=''
 if(testing){
     datadir='--datadir "/home/eth/.ethereum/testnet"';
     ipcpath='--ipcpath=/home/eth/.ethereum/testnet/geth.ipc'
-    //keystore='--keystore /home/eth/.ethereum/testnet/keystore'
 }
 checkPswd();
-
 function checkPswd(){
     exec('geth '+datadir+'  account list', (err, stdout, stderr)=>{
         console.log(stdout);
@@ -68,7 +68,7 @@ function checkPswd(){
 }
 function runGeth(){
     var isOpen=false;
-    const geth = spawn('geth', [ '--rpc', '--rpccorsdomain=localhost:8545', '--testnet', '--datadir=/home/eth/.ethereum', ipcpath, '--unlock=0', '--password='+passwordFileName, '--rpcapi=db,eth,net,web3,personal', '--rpcport=8545', '--rpcaddr=localhost']); 
+    const geth = spawn('geth', [ '--rpc', '--rpccorsdomain=localhost:8545', '--testnet', '--datadir=/home/eth/.ethereum', ipcpath, '--unlock=0', '--password='+passwordFileName, '--rpcapi=db,eth,net,web3,personal', '--rpcport=8545', '--rpcaddr=localhost', '--metrics']); 
     geth.stdout.on('data', data=>{
     });
     geth.stderr.on( 'data', data => { //for some reason Geth prints to stderr....
@@ -85,22 +85,17 @@ function runGeth(){
         else if (indexOfUnlocked>0){
             console.log("Address unlocked: "+data.substring(indexOfUnlocked+"Unlocked account".length+1));
         }
-        //else if(indexOfServer>0){
-            //console.log("Geth Server Starting");
-        //}
-        //else if(!isOpen){
-            //console.log("Please wait...");
-       // }
     });
 }
 function runWeb3(){
     web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
     var abi =[{"constant":true,"inputs":[{"name":"","type":"bytes32"}],"name":"trackNumberRecords","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_petid","type":"bytes32"},{"name":"_type","type":"uint256"},{"name":"_attribute","type":"string"},{"name":"_isEncrypted","type":"bool"}],"name":"addAttribute","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"getRevenue","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"bytes32"},{"name":"","type":"uint256"}],"name":"pet","outputs":[{"name":"timestamp","type":"uint256"},{"name":"typeAttribute","type":"uint256"},{"name":"attributeText","type":"string"},{"name":"isEncrypted","type":"bool"}],"type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"costToAdd","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"inputs":[],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_petid","type":"bytes32"},{"indexed":false,"name":"_type","type":"uint256"}],"name":"attributeAdded","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_petid","type":"bytes32"},{"indexed":false,"name":"error","type":"string"}],"name":"attributeError","type":"event"}];
-    const contractAddress='0x69De4ADbb566c1c68e8dB1274229adA4A3D9f8A8';
+    
     if(web3.eth.accounts.length>0){
         web3.eth.defaultAccount=web3.eth.accounts[0];
     }
-    var contract=web3.eth.contract(abi).at(contractAddress);
+    contract=web3.eth.contract(abi).at(contractAddress);
+    
     var sPort=new SerialPort("/dev/ttyAMA0", {
         parser: SerialPort.parsers.byteLength(14)
     });
@@ -108,22 +103,21 @@ function runWeb3(){
         console.log("opened");
     });
     sPort.on('data', (data)=>{
-        //data=data.toString('hex');
         data=data.toString();
         data=data.substring(2, data.length);
         data=data.substring(0, data.length-1);
-        //data=data.replace(/ /g, "");
-        console.log(data);
+        console.log(data); //HUGE SECURITY RISK!
         if(data){
-            var results=getAttributes(contract, data);
-            console.log(results);
-            wss.broadcast(JSON.stringify(results));
+            data=web3.sha3(data);
+            wss.broadcast(JSON.stringify({petId:data}));
+            getAttributes(contract, data);
+            //console.log(results);
+            
             //send to all clients via websockets here
         } 
     });
 }
-function getAttributes(contract, id){
-    var hashId=web3.sha3(id);
+function getAttributes(contract, hashId){
     var maxIndex=contract.trackNumberRecords(hashId).c[0];
     var currentResults=[];
     for(var i=0; i<maxIndex;++i){
@@ -131,5 +125,40 @@ function getAttributes(contract, id){
         var attributeText=CryptoJS.AES.decrypt(val[2], id).toString(CryptoJS.enc.Utf8);
         currentResults.push({timestamp:new Date(val[0].c[0]*1000), attributeType:val[1].c[0], attributeText:attributeText, isEncrypted:val[3]});
     }
-    return currentResults;
+    results={retrievedData:currentResults};
+    wss.broadcast(JSON.stringify(results));
+
+}
+
+function addAttribute(contract, hashId){
+    if(contract.costToAdd().greaterThan(web3.eth.getBalance(web3.eth.defaultAccount))){
+        wss.broadcast(JSON.stringify({error:"Not enough Ether!"}));
+        return;
+    }
+    contract.addAttribute.sendTransaction(hashId, attributeType, attributeValue, addedEncryption, {value:contract.costToAdd(), gas:3000000}, (err, results)=>{
+        if(err){
+            console.log(err);
+            console.log(results);
+        }
+        else{
+            console.log(results);
+            
+        }
+    });
+    contract.attributeError({_petid:hashId}, (error, result)=>{
+        if(error){
+            console.log(error);
+            return;
+        }
+        console.log(result);
+    });
+    contract.attributeAdded({_petid:hashId}, (error, result)=>{
+        if(error){
+            console.log(error);
+            return;
+        }
+        console.log(result);
+        getAttributes(contract, hashId);
+        wss.broadcast(JSON.stringify({moneyInAccount:web3.fromWei(web3.eth.getBalance(web3.eth.defaultAccount))}));
+    });
 }

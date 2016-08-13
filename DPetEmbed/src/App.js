@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+var CryptoJS = require("crypto-js");
 import { Button, FormControl, Grid, FormGroup, Form, InputGroup, Input, Table, Checkbox, ControlLabel, Jumbotron, Row, Col, Modal } from 'react-bootstrap';
-const contractAddress='0x69De4ADbb566c1c68e8dB1274229adA4A3D9f8A8';
+//const contractAddress='0x69De4ADbb566c1c68e8dB1274229adA4A3D9f8A8';
 const blockChainView='https://testnet.etherscan.io/address/';
 const selection=[
     "Temperament",
@@ -13,18 +14,100 @@ const selection=[
 const port=4000;
 const url='ws://'+window.location.hostname+':'+port; 
 const socket=new WebSocket(url); 
-socket.onmessage=(event)=>{
-  console.log(event.data);
+const messageTypes={
+  accounts:function(self, value){
+    self.setState({
+      account:value
+    });
+  },
+  cost:function(self, value){
+    self.setState({
+      cost:value
+    });
+  },
+  retrievedData:function(self, value){
+    self.setState({
+      successSearch:value[0]?true:false,
+      showNew:value[0]?false:true
+    });
+  },
+  petId:function(self, value){
+    self.setState({
+      petId:value
+    });
+  },
+  contractAddress:function(self, value){
+    self.setState({
+      contractAddress:value
+    });
+  },
+  moneyInAccount:function(self, value){
+    self.setState({
+      moneyInAccount:value
+    });
+  }
+};
+
+class TblRow extends Component {
+    constructor(props){
+      super(props);
+        this.state={
+            attributeText:this.props.attributeText,
+            isEncrypted:this.props.isEncrypted
+        };
+    }
+    decrypt(password){
+        this.setState({
+            attributeText:CryptoJS.AES.decrypt(this.state.attributeText, password).toString(CryptoJS.enc.Utf8),
+            isEncrypted:false
+        });
+    }
+    render(){
+        return(
+        <Row>             
+            <Col xsHidden sm={7} >{this.props.timestamp}</Col>
+            <Col xs={6} sm={2}>{this.props.label}</Col>
+            <Col xs={6} sm={3} >{this.state.isEncrypted?
+                <Button disabled={!this.props.isEncrypted} onClick={()=>{this.props.onDecrypt(this.decrypt);}}>Decrypt</Button>:
+                this.state.attributeText}
+            </Col>
+        </Row>
+        );
+    }
 }
+
+
 class App extends Component {
   constructor(props){
     super(props);
+    socket.onmessage=(data)=>{
+      this.onGetMessage(data);
+    }
     this.state={
-      addedEncryption:false,
+      addedEncryption:true,
+      name:"",
+      owner:"",
+      contractAddress:"",
+      showNew:false,
+      account:"",
       password:"",
       cost:0,
+      moneyInAccount:0,
       show:false,
+      myPasswordFunction:function(){},
     };
+  }
+  onGetMessage(data){
+    console.log(data);
+    var keys=Object.keys(data);
+    if(keys.length>0){
+      console.log("Only one key allowed!");
+      return;
+    }
+    if(messageTypes[keys[0]]){
+      messageTypes[keys[0]](this, data[keys[0]]);
+    }
+    
   }
   onAdditionalEncryption(){
       this.setState({
@@ -38,7 +121,7 @@ class App extends Component {
   }
   onPassword(){
     this.setState({askForPassword: false}, 
-        function(){
+        ()=>{
             this.state.myPasswordFunction(this.state.password);
             this.setState({password:""});
         }
@@ -69,13 +152,13 @@ class App extends Component {
     this.setState({askForPassword: false});
   }
   render(){
-      var self=this;
+
       return(
           <div>
             <Jumbotron>
               <Grid>
                   <h1>DPets</h1>
-                  <p>Input and access animal records: decentralized, immutable, and secure.  <a  onClick={this.showModal}>Learn More!</a></p>
+                  <p>Input and access animal records: decentralized, immutable, and secure.  <a  onClick={()=>{this.showModal();}}>Learn More!</a></p>
               </Grid>
           </Jumbotron>
           <Modal
@@ -93,7 +176,7 @@ class App extends Component {
               The contract that governs this is available at {contractAddress} on the blockchain.  See it <a href={blockChainView+contractAddress} target="_blank">here.</a> </p>
           </Modal.Body>
           <Modal.Footer>
-              <Button onClick={this.hideModal}>Close</Button>
+              <Button onClick={()=>{this.hideModal();}}>Close</Button>
           </Modal.Footer>
           </Modal>
           <Modal
@@ -138,11 +221,11 @@ class App extends Component {
                       
                       <FormGroup>
                           <ControlLabel>Value</ControlLabel>
-                          <FormControl type="text" disabled={!this.state.petId}  onChange={this.onAttributeValue}/>
+                          <FormControl type="text" disabled={!this.state.petId}  onChange={(event)=>{this.onAttributeValue(event);}}/>
                           
                       </FormGroup>
-                      <Checkbox disabled={!this.state.petId} checked={this.state.addedEncryption} onChange={this.onAdditionalEncryption}>Additional Encryption</Checkbox>
-                      <Button bsStyle="primary" onClick={this.addAttribute}>Submit New Result (costs {this.state.cost} Ether)</Button>
+                      <Checkbox disabled={!this.state.petId} checked={this.state.addedEncryption} onChange={()=>{this.onAdditionalEncryption();}}>Additional Encryption</Checkbox>
+                      <Button bsStyle="primary" onClick={(event)=>{this.addAttribute(event);}}>Submit New Result (costs {this.state.cost} Ether)</Button>
                       
                   </Col>
                     
@@ -164,7 +247,7 @@ class App extends Component {
                       </Row>
                       {this.state.historicalData.map(function(val, index){
                           return(
-                              <TblRow key={index} timestamp={val.timestamp.toString()} attributeText={val.attributeText}  label={selection[val.attributeType]||"Unknown"} isEncrypted={val.isEncrypted} onDecrypt={self.showPasswordModal}/>
+                              <TblRow key={index} timestamp={val.timestamp.toString()} attributeText={val.attributeText}  label={selection[val.attributeType]||"Unknown"} isEncrypted={val.isEncrypted} onDecrypt={(fnct)=>{this.showPasswordModal(fnct)}}/>
                           );
                       })}
 
