@@ -8,13 +8,21 @@ var SerialPort=require("serialport");
 var uuid = require('node-uuid');
 const WebSocketServer = require('ws').Server;
 const wss = new WebSocketServer({ port: 4000 });
+var web3=new Web3();
 
+app.use(express.static(path.join(__dirname, 'DPetEmbed/build'))); 
+const port=3500;
+app.listen(port);
+const spawn = require( 'child_process' ).spawn;
+const exec = require( 'child_process' ).exec;
+
+var address='';
 wss.on('connection', (ws)=>{
   ws.on('message', (message)=>{
     console.log('received: %s', message);
   });
 
-  ws.send('something');
+  ws.send(web3.eth.defaultAccount);
 });
 wss.broadcast = function(data) {
     wss.clients.forEach((client)=>{
@@ -22,17 +30,6 @@ wss.broadcast = function(data) {
     });
 };
 
-var web3=new Web3();
-app.use(express.static(path.join(__dirname, 'DPetEmbed/Build'))); 
-const port=3500;
-app.listen(port);
-const spawn = require( 'child_process' ).spawn;
-const exec = require( 'child_process' ).exec;
-const readline = require('readline');
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout
-});
 var passwordFileName='pswd.txt';
 var pswd=path.join(__dirname, passwordFileName);
 const testing=true;
@@ -71,7 +68,7 @@ function checkPswd(){
 }
 function runGeth(){
     var isOpen=false;
-    const geth = spawn('geth', [ '--rpc', '--rpccorsdomain=localhost', '--testnet', '--datadir=/home/eth/.ethereum', ipcpath, '--unlock=0', '--password='+passwordFileName, '--rpcapi=db,eth,net,web3,personal', '--rpcport=8545', '--rpcaddr=localhost']); 
+    const geth = spawn('geth', [ '--rpc', '--rpccorsdomain=localhost:8545', '--testnet', '--datadir=/home/eth/.ethereum', ipcpath, '--unlock=0', '--password='+passwordFileName, '--rpcapi=db,eth,net,web3,personal', '--rpcport=8545', '--rpcaddr=localhost']); 
     geth.stdout.on('data', data=>{
     });
     geth.stderr.on( 'data', data => { //for some reason Geth prints to stderr....
