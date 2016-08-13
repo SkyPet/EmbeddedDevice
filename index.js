@@ -44,7 +44,13 @@ function checkPswd(){
                 if(err) {
                     return console.log(err);
                 }
-                runGeth();
+                exec('geth --password '+passwordFileName+' account new', (err, stdout, stderr)=>{
+                    if(err){
+                        return console.log(err);
+                    }
+                    runGeth();
+                })
+                
             });
         }
         else{
