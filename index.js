@@ -37,7 +37,6 @@ var passwordFileName='pswd.txt';
 var pswd=path.join(__dirname, passwordFileName);
 checkPswd();
 function checkPswd(){
-    var isOpen=false;
     exec('geth account list', (err, stdout, stderr)=>{
         if(err){
             var value=uuid.v1();
@@ -55,6 +54,7 @@ function checkPswd(){
     });
 }
 function runGeth(){
+    var isOpen=false;
     const geth = spawn( 'geth', [ '--rpc', '--rpccorsdomain=*', '--testnet', '--unlock=0', '--password='+passwordFileName, '--rpcapi="db,eth,net,web3,personal"', ' --rpcport="8545"', '--rpcaddr="localhost"']); 
     geth.stdout.on('data', data=>{
     });
