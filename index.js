@@ -110,6 +110,8 @@ function runWeb3(){
     sPort.on('data', (data)=>{
         //data=data.toString('hex');
         data=data.toString();
+        data=data.substring(2, data.length);
+        data=data.substring(0, data.length-1);
         //data=data.replace(/ /g, "");
         console.log(data);
         if(data){
