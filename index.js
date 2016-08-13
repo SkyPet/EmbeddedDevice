@@ -23,7 +23,7 @@ wss.broadcast = function(data) {
 };
 
 var web3=new Web3();
-app.use(express.static(path.join(__dirname, 'Build'))); 
+app.use(express.static(path.join(__dirname, 'DPetEmbed/Build'))); 
 const port=3500;
 app.listen(port);
 const spawn = require( 'child_process' ).spawn;
