@@ -36,32 +36,31 @@ const rl = readline.createInterface({
 var passwordFileName='pswd.txt';
 var pswd=path.join(__dirname, passwordFileName);
 const testing=true;
-//var datadir='--datadir "/home/eth/.ethereum"';
-var keystore=''
+var datadir='--datadir "/home/eth/.ethereum"';
+var ipcpath='--ipcpath "/home/eth/.ethereum/geth.ipc"';
+//var keystore=''
 if(testing){
-    //datadir='--datadir "/home/eth/.ethereum/testnet"';
-    keystore='--keystore "/home/eth/.ethereum/testnet/keystore"'
+    datadir='--datadir "/home/eth/.ethereum/testnet"';
+    ipcpath='--ipcpath "/home/eth/.ethereum/testnet/geth.ipc"'
+    //keystore='--keystore /home/eth/.ethereum/testnet/keystore'
 }
 
 checkPswd();
 
 function checkPswd(){
-    exec('geth '+keystore+'  account list', (err, stdout, stderr)=>{
-        console.log(stdout);
-        console.log(err);
-        if(err){
+    exec('geth '+datadir+'  account list', (err, stdout, stderr)=>{
+        if(err||!stdout){
             var value=uuid.v1();
             fs.writeFile(pswd, value, (err)=>{
                 if(err) {
                     return console.log(err);
                 }
-                exec('geth '+keystore+' --password '+passwordFileName+' account new', (err, stdout, stderr)=>{
+                exec('geth '+datadir+' --password '+passwordFileName+' account new', (err, stdout, stderr)=>{
                     if(err){
                         return console.log(err);
                     }
                     runGeth();
-                })
-                
+                });
             });
         }
         else{
@@ -72,7 +71,7 @@ function checkPswd(){
 }
 function runGeth(){
     var isOpen=false;
-    const geth = spawn('geth', [ '--rpc', '--rpccorsdomain=*', '--testnet', '--datadir=/home/eth/.ethereum', '--unlock=0', '--password='+passwordFileName, '--rpcapi="db,eth,net,web3,personal"', '--rpcport=8545', '--rpcaddr=localhost']); 
+    const geth = spawn('geth', [ '--rpc', '--rpccorsdomain=*', '--testnet', '--datadir=/home/eth/.ethereum', ipcpath, '--unlock=0', '--password='+passwordFileName, '--rpcapi="db,eth,net,web3,personal"', '--rpcport=8545', '--rpcaddr=localhost']); 
     geth.stdout.on('data', data=>{
     });
     geth.stderr.on( 'data', data => { //for some reason Geth prints to stderr....
