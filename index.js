@@ -64,7 +64,7 @@ function checkPswd(){
 }
 function runGeth(){
     var isOpen=false;
-    const geth = spawn('geth', ['--datadir=/home/eth/.ethereum',  '--rpc', '--rpccorsdomain=*', '--testnet', '--unlock=0', '--password='+passwordFileName, '--rpcapi="db,eth,net,web3,personal"', ' --rpcport="8545"', '--rpcaddr="localhost"']); 
+    const geth = spawn('geth', [ '--rpc', '--rpccorsdomain=*', '--testnet', '--datadir=/home/eth/.ethereum', '--unlock=0', '--password='+passwordFileName, '--rpcapi="db,eth,net,web3,personal"', '--rpcport=8545', '--rpcaddr=localhost']); 
     geth.stdout.on('data', data=>{
     });
     geth.stderr.on( 'data', data => { //for some reason Geth prints to stderr....
