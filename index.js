@@ -37,11 +37,11 @@ var passwordFileName='pswd.txt';
 var pswd=path.join(__dirname, passwordFileName);
 const testing=true;
 var datadir='--datadir "/home/eth/.ethereum"';
-var ipcpath='--ipcpath "/home/eth/.ethereum/geth.ipc"';
+var ipcpath='--ipcpath=/home/eth/.ethereum/geth.ipc';
 //var keystore=''
 if(testing){
     datadir='--datadir "/home/eth/.ethereum/testnet"';
-    ipcpath='--ipcpath "/home/eth/.ethereum/testnet/geth.ipc"'
+    ipcpath='--ipcpath=/home/eth/.ethereum/testnet/geth.ipc'
     //keystore='--keystore /home/eth/.ethereum/testnet/keystore'
 }
 
