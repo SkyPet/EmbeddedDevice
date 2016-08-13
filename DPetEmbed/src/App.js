@@ -98,6 +98,7 @@ class App extends Component {
     };
   }
   onGetMessage(data){
+    data=JSON.parse(data.data);
     console.log(data);
     var keys=Object.keys(data);
     if(keys.length>0){
@@ -173,7 +174,7 @@ class App extends Component {
               <h4>How it works</h4>
               <p>Every pet should have a microchip which uniquely identifies itself.  A scanner can read the microchip and an ID is read.  For example, the ID may be 123.  This ID is then hashed and placed on the Ethereum blockchain.  The unhashed ID serves as a key to encrypt the name and address of the owner: hence the pet itself is needed in order to know who the owner and the address are (they are not public without knowing the ID of the pet).  This is not secure in the same sense that a human medical or banking record is secure; but as addresses are essentially public this is not a major issue.  If the medical records for the pet are not desired to be "public" then they can be encrypted using a key not associated with the microchip (eg, a password provided by the owners). 
               
-              The contract that governs this is available at {contractAddress} on the blockchain.  See it <a href={blockChainView+contractAddress} target="_blank">here.</a> </p>
+              The contract that governs this is available at {this.state.contractAddress} on the blockchain.  See it <a href={blockChainView+this.state.contractAddress} target="_blank">here.</a> </p>
           </Modal.Body>
           <Modal.Footer>
               <Button onClick={()=>{this.hideModal();}}>Close</Button>
