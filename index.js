@@ -47,8 +47,7 @@ function checkPswd(){
                 if(err) {
                     return console.log(err);
                 }
-                console.log('geth '+datadir+' --password '+passwordFileName+' account new');
-                exec('geth --password '+passwordFileName+' account new', (err, stdout, stderr)=>{
+                exec('geth '+datadir+' --password '+passwordFileName+' account new', (err, stdout, stderr)=>{
                     if(err){
                         return console.log(err);
                     }
@@ -65,7 +64,7 @@ function checkPswd(){
 }
 function runGeth(){
     var isOpen=false;
-    const geth = spawn( 'geth', [ '--rpc', '--rpccorsdomain=*', '--testnet', '--unlock=0', '--password='+passwordFileName, '--rpcapi="db,eth,net,web3,personal"', ' --rpcport="8545"', '--rpcaddr="localhost"', datadir]); 
+    const geth = spawn( 'geth', [datadir,  '--rpc', '--rpccorsdomain=*', '--testnet', '--unlock=0', '--password='+passwordFileName, '--rpcapi="db,eth,net,web3,personal"', ' --rpcport="8545"', '--rpcaddr="localhost"']); 
     geth.stdout.on('data', data=>{
     });
     geth.stderr.on( 'data', data => { //for some reason Geth prints to stderr....
