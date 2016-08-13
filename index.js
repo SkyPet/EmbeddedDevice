@@ -39,7 +39,7 @@ const datadir='--datadir "/home/eth/.ethereum"';
 checkPswd();
 
 function checkPswd(){
-    exec('geth '+datadir+' account list', (err, stdout, stderr)=>{
+    exec('geth --testnet '+datadir+'  account list', (err, stdout, stderr)=>{
         console.log(stdout);
         if(err){
             var value=uuid.v1();
@@ -47,7 +47,7 @@ function checkPswd(){
                 if(err) {
                     return console.log(err);
                 }
-                exec('geth '+datadir+' --password '+passwordFileName+' account new', (err, stdout, stderr)=>{
+                exec('geth --testnet '+datadir+' --password '+passwordFileName+' account new', (err, stdout, stderr)=>{
                     if(err){
                         return console.log(err);
                     }
