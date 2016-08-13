@@ -1,0 +1,22 @@
+{
+  "name": "dpets",
+  "version": "1.0.0",
+  "description": "Decentralized app for tracking pet records using IOT embedded device",
+  "main": "index.js",
+  "dependencies": {
+    "crypto-js": "^3.1.6",
+    "express": "^4.14.0",
+    "fs-extra": "^0.30.0",
+    "serialport": "^4.0.1",
+    "web3": "^0.17.0-alpha",
+    "ws": "^1.1.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack -d --watch",
+    "build": "webpack --config ./webpack.config.production.js"
+  },
+  "author": "Daniel Stahl",
+  "license": "ISC"
+}
