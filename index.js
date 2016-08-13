@@ -44,6 +44,7 @@ function checkPswd(){
                 if(err) {
                     return console.log(err);
                 }
+                console.log('geth --password '+passwordFileName+' account new');
                 exec('geth --password '+passwordFileName+' account new', (err, stdout, stderr)=>{
                     if(err){
                         return console.log(err);
