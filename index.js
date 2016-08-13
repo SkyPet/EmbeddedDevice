@@ -39,12 +39,9 @@ checkPswd();
 function checkPswd(){
     var isOpen=false;
     exec('geth account list', (err, stdout, stderr)=>{
-        console.log(stdout);
-        console.log(stderr);
-        console.log(err);
-        /*if(data==='Fatal: Could not list accounts: no keys in store'){
+        if(err){
             var value=uuid.v1();
-            fs.writeFile(pswd, value, function(err) {
+            fs.writeFile(pswd, value, (err)=>{
                 if(err) {
                     return console.log(err);
                 }
@@ -53,7 +50,7 @@ function checkPswd(){
         }
         else{
             runGeth();
-        }*/
+        }
     
     });
 }
