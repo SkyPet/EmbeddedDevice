@@ -10,6 +10,12 @@ const selection=[
     "Owner", //this can be encrypted
     "Address" //this can be encrypted
 ];
+const port=4000;
+const url='ws://'+window.location.hostname+':'+port; 
+const socket=new WebSocket(url); 
+socket.onmessage=(event)=>{
+  console.log(event.data);
+}
 class App extends Component {
   constructor(props){
     super(props);

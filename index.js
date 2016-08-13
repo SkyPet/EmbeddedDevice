@@ -5,7 +5,7 @@ var fs=require('fs');
 var CryptoJS = require("crypto-js");
 var Web3 = require('web3');
 var SerialPort=require("serialport");
-
+var uuid = require('node-uuid');
 const WebSocketServer = require('ws').Server;
 const wss = new WebSocketServer({ port: 4000 });
 
@@ -34,44 +34,27 @@ const rl = readline.createInterface({
 });
 var passwordFileName='pswd.txt';
 var pswd=path.join(__dirname, passwordFileName);
-function hidden(query, callback) {
-    var stdin = process.openStdin();
-    process.stdin.on("data", function(char) {
-        char = char + "";
-        switch (char) {
-            case "\n":
-            case "\r":
-            case "\u0004":
-                stdin.pause();
-                break;
-            default:
-                process.stdout.write("\033[2K\033[200D" + query + Array(rl.line.length+1).join("*"));
-                break;
-        }
-    });
-    rl.question(query, function(value) {
-        rl.history = rl.history.slice(1);
-        callback(value);
-        rl.close();
-    });
-}
-fs.stat(pswd, function(err, stats) { 
-    if (err) { 
-        hidden("Enter Password for account 0 in Geth: ", function(value) {
+checkPswd();
+function checkPswd(){
+    var isOpen=false;
+    const gethCheck=spawn('geth account list');
+    gethCheck.stderr.on('data', (data)=>{
+        data=""+data;
+        if(data==='Fatal: Could not list accounts: no keys in store'){
+            var value=uuid.v1();
             fs.writeFile(pswd, value, function(err) {
                 if(err) {
                     return console.log(err);
                 }
                 runGeth();
             });
-        }); 
-    } 
-    else{
-        runGeth();
-    }
-}); 
+        }
+        else{
+            runGeth();
+        }
+    });
+}
 function runGeth(){
-    var isOpen=false;
     const geth = spawn( 'geth', [ '--rpc', '--rpccorsdomain=*', '--testnet', '--unlock=0', '--password='+passwordFileName, '--rpcapi="db,eth,net,web3,personal"', ' --rpcport="8545"', '--rpcaddr="localhost"']); 
     geth.stdout.on('data', data=>{
     });
@@ -81,7 +64,6 @@ function runGeth(){
         var indexOfUnlocked=data.indexOf("Unlocked account");
         var indexOfServer=data.indexOf("Starting Server");
         if(indexOfImported>0 && !isOpen) {
-            //open('http://localhost:3500');
             console.log("open");
             runWeb3();
             isOpen=true;
@@ -105,8 +87,8 @@ function runWeb3(){
         web3.eth.defaultAccount=web3.eth.accounts[0];
     }
     var contract=web3.eth.contract(abi).at(contractAddress);
-    var sPort=new SerialPort("/dev/ttyS0", {
-        parser: SerialPort.parsers.byteLength(9)
+    var sPort=new SerialPort("/dev/ttyAMA0", {
+        parser: SerialPort.parsers.byteLength(14)
     });
     sPort.on('open', ()=>{
         console.log("opened");
@@ -116,6 +98,7 @@ function runWeb3(){
         data=data.replace(/ /g, "");
         if(data){
             var results=getAttributes(contract, data);
+            console.log(results);
             wss.broadcast(results);
             //send to all clients via websockets here
         } 

@@ -7,6 +7,7 @@
     "crypto-js": "^3.1.6",
     "express": "^4.14.0",
     "fs-extra": "^0.30.0",
+    "node-uuid": "^1.4.7",
     "serialport": "^4.0.1",
     "web3": "^0.17.0-alpha",
     "ws": "^1.1.1"
