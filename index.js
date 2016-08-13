@@ -108,12 +108,14 @@ function runWeb3(){
         console.log("opened");
     });
     sPort.on('data', (data)=>{
-        data=data.toString('hex');
-        data=data.replace(/ /g, "");
+        //data=data.toString('hex');
+        data=data.toString();
+        //data=data.replace(/ /g, "");
+        console.log(data);
         if(data){
             var results=getAttributes(contract, data);
             console.log(results);
-            wss.broadcast(results);
+            wss.broadcast(JSON.stringify(results));
             //send to all clients via websockets here
         } 
     });
