@@ -44,13 +44,14 @@ if(testing){
     ipcpath='--ipcpath=/home/eth/.ethereum/testnet/geth.ipc'
     //keystore='--keystore /home/eth/.ethereum/testnet/keystore'
 }
-
+console.log(datadir);
 checkPswd();
 
 function checkPswd(){
     exec('geth '+datadir+'  account list', (err, stdout, stderr)=>{
+        console.log(stdout);
         if(err||!stdout){
-            var value=uuid.v1();
+            var value=uuid.v1().replace(/-/g, "");
             fs.writeFile(pswd, value, (err)=>{
                 if(err) {
                     return console.log(err);
@@ -79,7 +80,7 @@ function runGeth(){
         console.log(data);
         var indexOfImported=data.indexOf("imported");
         var indexOfUnlocked=data.indexOf("Unlocked account");
-        var indexOfServer=data.indexOf("Starting Server");
+        //var indexOfServer=data.indexOf("Starting Server");
         if(indexOfImported>0 && !isOpen) {
             console.log("open");
             runWeb3();
@@ -88,12 +89,12 @@ function runGeth(){
         else if (indexOfUnlocked>0){
             console.log("Address unlocked: "+data.substring(indexOfUnlocked+"Unlocked account".length+1));
         }
-        else if(indexOfServer>0){
-            console.log("Geth Server Starting");
-        }
-        else if(!isOpen){
-            console.log("Please wait...");
-        }
+        //else if(indexOfServer>0){
+            //console.log("Geth Server Starting");
+        //}
+        //else if(!isOpen){
+            //console.log("Please wait...");
+       // }
     });
 }
 function runWeb3(){
