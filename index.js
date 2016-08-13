@@ -27,6 +27,7 @@ app.use(express.static(path.join(__dirname, 'DPetEmbed/Build')));
 const port=3500;
 app.listen(port);
 const spawn = require( 'child_process' ).spawn;
+const exec = require( 'child_process' ).exec;
 const readline = require('readline');
 const rl = readline.createInterface({
   input: process.stdin,
@@ -37,10 +38,11 @@ var pswd=path.join(__dirname, passwordFileName);
 checkPswd();
 function checkPswd(){
     var isOpen=false;
-    const gethCheck=spawn('geth account list');
-    gethCheck.stderr.on('data', (data)=>{
-        data=""+data;
-        if(data==='Fatal: Could not list accounts: no keys in store'){
+    exec('geth account list', (err, stdout, stderr)=>{
+        console.log(stdout);
+        console.log(stderr);
+        console.log(err);
+        /*if(data==='Fatal: Could not list accounts: no keys in store'){
             var value=uuid.v1();
             fs.writeFile(pswd, value, function(err) {
                 if(err) {
@@ -51,7 +53,8 @@ function checkPswd(){
         }
         else{
             runGeth();
-        }
+        }*/
+    
     });
 }
 function runGeth(){
