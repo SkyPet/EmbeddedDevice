@@ -38,7 +38,6 @@ var pswd=path.join(__dirname, passwordFileName);
 checkPswd();
 function checkPswd(){
     exec('geth account list', (err, stdout, stderr)=>{
-        console.log(stdout);
         if(err){
             var value=uuid.v1();
             fs.writeFile(pswd, value, (err)=>{
@@ -68,6 +67,7 @@ function runGeth(){
     });
     geth.stderr.on( 'data', data => { //for some reason Geth prints to stderr....
         data=""+data;
+        console.log(data);
         var indexOfImported=data.indexOf("imported");
         var indexOfUnlocked=data.indexOf("Unlocked account");
         var indexOfServer=data.indexOf("Starting Server");
