@@ -35,8 +35,11 @@ wss.on('connection', (ws)=>{
     ws.send(JSON.stringify({contractAddress:contractAddress}));
     ws.send(JSON.stringify({cost:web3.fromWei(contract.costToAdd()).toString()}));
     ws.send(JSON.stringify({moneyInAccount:web3.fromWei(web3.eth.getBalance(web3.eth.defaultAccount))}));
-    ws.send(JSON.stringify({petId:hashId}));
-    ws.send(JSON.stringify({retrievedData:searchResults}));
+    if(hashId){
+        ws.send(JSON.stringify({petId:hashId}));
+        ws.send(JSON.stringify({retrievedData:searchResults}));
+    }
+    
 });
 wss.broadcast = function(data) {
     wss.clients.forEach((client)=>{
@@ -130,9 +133,9 @@ function getAttributes(){
     for(var i=0; i<maxIndex;++i){
         var val=contract.pet(hashId, i);
         var attributeText=CryptoJS.AES.decrypt(val[2], unHashedId).toString(CryptoJS.enc.Utf8);
-        currentResults.push({timestamp:new Date(val[0].c[0]*1000), attributeType:val[1].c[0], attributeText:attributeText, isEncrypted:val[3]});
+        searchResults.push({timestamp:new Date(val[0].c[0]*1000), attributeType:val[1].c[0], attributeText:attributeText, isEncrypted:val[3]});
     }
-    results={retrievedData:currentResults};
+    results={retrievedData:searchResults};
     wss.broadcast(JSON.stringify(results));
 }
 

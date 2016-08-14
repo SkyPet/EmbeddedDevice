@@ -69,6 +69,7 @@ class App extends Component {
         this.setState({
           petId:value
         });
+        
       },
       contractAddress:(value)=>{
         this.setState({
@@ -193,11 +194,11 @@ class App extends Component {
         myPasswordFunction:passwordFunction
     });
   }
-  onId(event){
+  /*onId(event){
     this.setState({
         petId:event.target.value
     });
-  }
+  }*/
   hidePasswordModal(){
     this.setState({askForPassword: false});
   }
