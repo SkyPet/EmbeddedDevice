@@ -17,7 +17,7 @@ const passwordFileName='pswd.txt';
 const testing=true;
 
 /*Global variables.  This is ok because only one pet can be scanned at a time*/
-var contract;
+var contract="";
 var hashId="";
 var unHashedId="";
 var searchResults=[]; 
@@ -52,7 +52,26 @@ wss.broadcast = function(data) {
         client.send(data);
     });
 };
-
+var sPort=new SerialPort("/dev/ttyAMA0", {
+    parser: SerialPort.parsers.byteLength(14)
+});
+sPort.on('open', ()=>{
+    console.log("opened");
+});
+sPort.on('data', (data)=>{
+    data=data.toString();
+    data=data.substring(2, data.length);
+    data=data.substring(0, data.length-1);
+    console.log(data); //HUGE SECURITY RISK!
+    if(data){
+        unHashedId=data;
+        hashId=web3.sha3(data);
+        wss.broadcast(JSON.stringify({petId:hashId}));
+        if(contract){
+            getAttributes();
+        }
+    } 
+});
 var pswd=path.join(__dirname, passwordFileName);
 var datadir='--datadir "/home/eth/.ethereum"';
 var ipcpath='--ipcpath=/home/eth/.ethereum/geth.ipc';
@@ -127,25 +146,9 @@ function runWeb3(){
     }
     contract=web3.eth.contract(abi).at(contractAddress);
     
-    var sPort=new SerialPort("/dev/ttyAMA0", {
-        parser: SerialPort.parsers.byteLength(14)
-    });
-    sPort.on('open', ()=>{
-        console.log("opened");
-    });
-    sPort.on('data', (data)=>{
-        data=data.toString();
-        data=data.substring(2, data.length);
-        data=data.substring(0, data.length-1);
-        console.log(data); //HUGE SECURITY RISK!
-        if(data){
-            unHashedId=data;
-            hashId=web3.sha3(data);
-            wss.broadcast(JSON.stringify({petId:hashId}));
-            getAttributes();
-        } 
-    });
+    
 }
+
 function getAttributes(){
     var maxIndex=contract.trackNumberRecords(hashId).c[0];
     searchResults=[];
