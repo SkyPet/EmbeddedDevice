@@ -122,7 +122,7 @@ function runWeb3(){
         if(data){
             unHashedId=data;
             hashId=web3.sha3(data);
-            wss.broadcast(JSON.stringify({petId:data}));
+            wss.broadcast(JSON.stringify({petId:hashId}));
             getAttributes();
         } 
     });
