@@ -34,7 +34,7 @@ class TblRow extends Component {
             <Col xsHidden sm={7} >{this.props.timestamp}</Col>
             <Col xs={6} sm={2}>{this.props.label}</Col>
             <Col xs={6} sm={3} >{this.state.isEncrypted?
-                <Button disabled={!this.props.isEncrypted} onClick={()=>{this.props.onDecrypt(this.decrypt);}}>Decrypt</Button>:
+                <Button disabled={!this.props.isEncrypted} onClick={()=>{this.props.onDecrypt((pswd)=>{this.decrypt(pswd);});}}>Decrypt</Button>:
                 this.state.attributeText}
             </Col>
         </Row>
@@ -221,7 +221,7 @@ class App extends Component {
               <Grid>
                   <h1>DPets</h1>
                   <p>Input and access animal records: decentralized, immutable, and secure.  <a  onClick={()=>{this.showModal();}}>Learn More!</a></p>
-                  Account: {this.state.account} <br></br> Balance: {this.state.moneyInAccount} <br></br>   {this.state.moneyInAccount===0?"Ether required!  Send the account some Ether to continue":null}.
+                  Account: {this.state.account} <br></br> Balance: {this.state.moneyInAccount} <br></br>   {this.state.moneyInAccount==0?"Ether required!  Send the account some Ether to continue":null}.
               </Grid>
           </Jumbotron>
           <Modal

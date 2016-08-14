@@ -39,6 +39,11 @@ wss.on('connection', (ws)=>{
         ws.send(JSON.stringify({petId:hashId}));
         ws.send(JSON.stringify({retrievedData:searchResults}));
     }
+    ws.on('close', (msg)=>{
+        if(testing){
+            hashId="";
+        }
+    });
     
 });
 wss.broadcast = function(data) {
