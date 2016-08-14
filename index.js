@@ -42,6 +42,7 @@ wss.on('connection', (ws)=>{
     ws.on('close', (msg)=>{
         if(testing){
             hashId="";
+            unHashedId="";
         }
     });
     
