@@ -90,7 +90,7 @@ function checkPswd(){
     });
 }
 function runGeth(password){
-    exec('geth --exec "personal.unlockAccount(eth.accounts[0], '+password+', 0)" attach ipc:'+ipcpath, (err, stdout, stderr)=>{
+    exec('geth --exec "personal.unlockAccount(eth.accounts[0], \''+password+'\', 0)" attach ipc:'+ipcpath, (err, stdout, stderr)=>{
         if(err){
             return console.log(err);
         }
