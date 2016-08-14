@@ -58,7 +58,7 @@ var datadir='--datadir "/home/eth/.ethereum"';
 var ipcpath='--ipcpath=/home/eth/.ethereum/geth.ipc';
 if(testing){
     datadir='--datadir "/home/eth/.ethereum/testnet"';
-    ipcpath='--ipcpath=/home/eth/.ethereum/testnet/geth.ipc'
+    ipcpath='/home/eth/.ethereum/testnet/geth.ipc'
 }
 checkPswd();
 function checkPswd(){
@@ -74,22 +74,35 @@ function checkPswd(){
                     if(err){
                         return console.log(err);
                     }
-                    runGeth();
+                    runGeth(value);
                 });
             });
         }
         else{
-            runGeth();
+            fs.readFile(pswd, (err, data)=>{
+                if(err){
+                    return console.log(err);
+                }
+                runGeth(data);
+            });
         }
     
     });
 }
-function runGeth(){
-    var isOpen=false;
-    const geth = spawn('geth', [ipcpath, /*'--rpccorsdomain=localhost:8545',*/ '--testnet', '--datadir=/home/eth/.ethereum', '--rpc', '--unlock=0', '--password='+passwordFileName/*, '--rpcapi=db,eth,net,web3,personal', '--rpcport=8545', '--rpcaddr=localhost'*/]); 
-    geth.stdout.on('data', data=>{
+function runGeth(password){
+    exec('geth --exec "personal.unlockAccount(eth.accounts[0], '+password+', 0)" attach ipc:'+ipcpath, (err, stdout, stderr)=>{
+        if(err){
+            return console.log(err);
+        }
+        else{
+            console.log("open");
+            runWeb3();
+        }
     });
-    geth.stderr.on( 'data', data => { //for some reason Geth prints to stderr....
+    //const geth = spawn('geth', [ /*'--rpccorsdomain=localhost:8545',*/ '--testnet', '--datadir=/home/eth/.ethereum', '--rpc', '--unlock=0', '--password='+passwordFileName, ipcpath/*, '--rpcapi=db,eth,net,web3,personal', '--rpcport=8545', '--rpcaddr=localhost'*/]); 
+    //geth.stdout.on('data', data=>{
+    //});
+    /*geth.stderr.on( 'data', data => { //for some reason Geth prints to stderr....
         data=""+data;
         console.log(data);
         var indexOfImported=data.indexOf("imported");
@@ -103,7 +116,7 @@ function runGeth(){
         else if (indexOfUnlocked>0){
             console.log("Address unlocked: "+data.substring(indexOfUnlocked+"Unlocked account".length+1));
         }
-    });
+    });*/
 }
 function runWeb3(){
     web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
