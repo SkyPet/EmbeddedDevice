@@ -15,19 +15,28 @@ const exec = require( 'child_process' ).exec;
 const contractAddress='0x69De4ADbb566c1c68e8dB1274229adA4A3D9f8A8';
 const passwordFileName='pswd.txt';
 const testing=true;
+
+/*Global variables.  This is ok because only one pet can be scanned at a time*/
 var contract;
+var hashId="";
+var unHashedId="";
+var searchResults=[]; 
 
 app.use(express.static(path.join(__dirname, 'DPetEmbed/build'))); 
 
 app.listen(port);
 wss.on('connection', (ws)=>{
     ws.on('message', (message)=>{
-        console.log(message);
+        var data=JSON.parse(message);
+        var keys=Object.keys(data);
+        addAttribute(keys[0], data[keys[0]], data[keys[1]]);
     });
     ws.send(JSON.stringify({accounts:web3.eth.defaultAccount}));
     ws.send(JSON.stringify({contractAddress:contractAddress}));
     ws.send(JSON.stringify({cost:web3.fromWei(contract.costToAdd()).toString()}));
     ws.send(JSON.stringify({moneyInAccount:web3.fromWei(web3.eth.getBalance(web3.eth.defaultAccount))}));
+    ws.send(JSON.stringify({petId:hashId}));
+    ws.send(JSON.stringify({retrievedData:searchResults}));
 });
 wss.broadcast = function(data) {
     wss.clients.forEach((client)=>{
@@ -108,41 +117,37 @@ function runWeb3(){
         data=data.substring(0, data.length-1);
         console.log(data); //HUGE SECURITY RISK!
         if(data){
-            data=web3.sha3(data);
+            unHashedId=data;
+            hashId=web3.sha3(data);
             wss.broadcast(JSON.stringify({petId:data}));
-            getAttributes(contract, data);
-            //console.log(results);
-            
-            //send to all clients via websockets here
+            getAttributes();
         } 
     });
 }
-function getAttributes(contract, hashId){
+function getAttributes(){
     var maxIndex=contract.trackNumberRecords(hashId).c[0];
-    var currentResults=[];
+    searchResults=[];
     for(var i=0; i<maxIndex;++i){
         var val=contract.pet(hashId, i);
-        var attributeText=CryptoJS.AES.decrypt(val[2], id).toString(CryptoJS.enc.Utf8);
+        var attributeText=CryptoJS.AES.decrypt(val[2], unHashedId).toString(CryptoJS.enc.Utf8);
         currentResults.push({timestamp:new Date(val[0].c[0]*1000), attributeType:val[1].c[0], attributeText:attributeText, isEncrypted:val[3]});
     }
     results={retrievedData:currentResults};
     wss.broadcast(JSON.stringify(results));
-
 }
 
-function addAttribute(contract, hashId){
+function addAttribute(attributeType, attributeValue, addedEncryption){
     if(contract.costToAdd().greaterThan(web3.eth.getBalance(web3.eth.defaultAccount))){
         wss.broadcast(JSON.stringify({error:"Not enough Ether!"}));
         return;
     }
-    contract.addAttribute.sendTransaction(hashId, attributeType, attributeValue, addedEncryption, {value:contract.costToAdd(), gas:3000000}, (err, results)=>{
+    contract.addAttribute.sendTransaction(hashId, attributeType, CryptoJS.AES.encrypt(attributeValue, unHashedId).toString(), addedEncryption, {value:contract.costToAdd(), gas:3000000}, (err, results)=>{
         if(err){
             console.log(err);
             console.log(results);
         }
         else{
             console.log(results);
-            
         }
     });
     contract.attributeError({_petid:hashId}, (error, result)=>{
