@@ -17,7 +17,6 @@ const url='ws://'+window.location.hostname+':'+port;
 class TblRow extends Component {
     constructor(props){
       super(props);
-      this.attr=this.props.attributeText;
       this.state={
         attributeText:this.props.attributeText,
         isEncrypted:this.props.isEncrypted
@@ -30,7 +29,7 @@ class TblRow extends Component {
         });
     }
     componentWillReceiveProps(nextProps){
-      if(this.attr!==nextProps.attributeText){
+      if(this.props.petId!==nextProps.petId){
         this.setState({
           attributeText:nextProps.attributeText,
           isEncrypted:nextProps.isEncrypted
@@ -200,37 +199,15 @@ class App extends Component {
       show:false
     });
   }
-  /*getName(event){
-    this.setState({
-      name:event.target.value
-    });
-  }
-  getOwner(event){
-    this.setState({
-      owner:event.target.value
-    });
-  }*/
   showPasswordModal(passwordFunction){
     this.setState({
         askForPassword:true,
         myPasswordFunction:passwordFunction
     });
   }
-  /*onId(event){
-    this.setState({
-        petId:event.target.value
-    });
-  }*/
   hidePasswordModal(){
     this.setState({askForPassword: false});
   }
-  /*closeNew(){
-    this.setState({showNew:false});
-  }
-  onFirst(){
-    this.onSubmit('Name', this.state.name);
-    this.onSubmit('Owner', this.state.owner);
-  }*/
   hideError(){
     this.setState({
       showError:""
@@ -349,7 +326,7 @@ class App extends Component {
                       </Row>
                       {this.state.historicalData.map((val, index)=>{
                           return(
-                              <TblRow key={index} timestamp={val.timestamp.toString()} attributeText={val.attributeText}  label={selection[val.attributeType]||"Unknown"} isEncrypted={val.isEncrypted} onDecrypt={(fnct)=>{this.showPasswordModal(fnct)}}/>
+                              <TblRow key={index} timestamp={val.timestamp.toString()} attributeText={val.attributeText}  label={selection[val.attributeType]||"Unknown"} isEncrypted={val.isEncrypted} petId={this.state.petId} onDecrypt={(fnct)=>{this.showPasswordModal(fnct)}}/>
                           );
                       })}
 
