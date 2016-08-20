@@ -28,6 +28,12 @@ class TblRow extends Component {
             isEncrypted:false
         });
     }
+    componentWillReceiveProps(nextProps){
+      this.setState({
+        attributeText:nextProps.attributeText,
+        isEncrypted:nextProps.isEncrypted
+      });
+    }
     render(){
         return(
         <Row>             
@@ -59,10 +65,22 @@ class App extends Component {
         });
       },
       retrievedData:(value)=>{
+        var name="";
+        var owner="";
+        value.map((val, ind)=>{
+          if(selection[val.attributeType]==='Owner'){
+            owner=val.attributeText;
+          }
+          else if(selection[val.attributeType]==='Name'){
+            name=val.attributeText;
+          }
+        });
         this.setState({
           successSearch:value[0]?true:false,
           showNew:value[0]?false:true,
-          historicalData:value
+          historicalData:value,
+          name:name,
+          owner:owner
         });
       },
       petId:(value)=>{
