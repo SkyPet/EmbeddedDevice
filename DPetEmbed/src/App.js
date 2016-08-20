@@ -17,10 +17,11 @@ const url='ws://'+window.location.hostname+':'+port;
 class TblRow extends Component {
     constructor(props){
       super(props);
-        this.state={
-            attributeText:this.props.attributeText,
-            isEncrypted:this.props.isEncrypted
-        };
+      this.attr=this.props.attributeText;
+      this.state={
+        attributeText:this.props.attributeText,
+        isEncrypted:this.props.isEncrypted
+      };
     }
     decrypt(password){
         this.setState({
@@ -29,10 +30,13 @@ class TblRow extends Component {
         });
     }
     componentWillReceiveProps(nextProps){
-      this.setState({
-        attributeText:nextProps.attributeText,
-        isEncrypted:nextProps.isEncrypted
-      });
+      if(this.attr!==nextProps.attributeText){
+        this.setState({
+          attributeText:nextProps.attributeText,
+          isEncrypted:nextProps.isEncrypted
+        });
+      }
+      
     }
     render(){
         return(
