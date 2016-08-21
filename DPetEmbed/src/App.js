@@ -19,14 +19,37 @@ class TblRow extends Component {
       super(props);
       this.state={
         attributeText:this.props.attributeText,
-        isEncrypted:this.props.isEncrypted
+        isEncrypted:this.props.isEncrypted,
+        wrongPassword:false
       };
     }
     decrypt(password){
+      var decrypted="";
+      try{
+        decrypted=CryptoJS.AES.decrypt(this.state.attributeText, password).toString(CryptoJS.enc.Utf8);
+      }
+      catch(e){
+        console.log(e);
+      }
+      if(decrypted){
         this.setState({
-            attributeText:CryptoJS.AES.decrypt(this.state.attributeText, password).toString(CryptoJS.enc.Utf8),
+            attributeText:decrypted,
             isEncrypted:false
         });
+      }
+      else{
+        this.setState({
+          wrongPassword:true
+        },
+          ()=>{
+            setTimeout(()=>{
+              this.setState({
+                wrongPassword:false
+              });
+            }, 2000);
+          }
+        );
+      }
     }
     componentWillReceiveProps(nextProps){
       if(this.props.petId!==nextProps.petId){
@@ -42,7 +65,7 @@ class TblRow extends Component {
         <Row>             
             <Col xsHidden sm={7} >{this.props.timestamp}</Col>
             <Col xs={6} sm={2}>{this.props.label}</Col>
-            <Col xs={6} sm={3} >{this.state.isEncrypted?
+            <Col xs={6} sm={3} >{this.state.isEncrypted?this.state.wrongPassword?<Button bsStyle="warning" onClick={()=>{this.props.onDecrypt((pswd)=>{this.decrypt(pswd);});}}>Wrong Password</Button>:
                 <Button disabled={!this.props.isEncrypted} onClick={()=>{this.props.onDecrypt((pswd)=>{this.decrypt(pswd);});}}>Decrypt</Button>:
                 this.state.attributeText}
             </Col>
