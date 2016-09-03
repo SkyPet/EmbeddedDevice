@@ -118,24 +118,6 @@ function runGeth(password){
             runWeb3();
         }
     });
-    //const geth = spawn('geth', [ /*'--rpccorsdomain=localhost:8545',*/ '--testnet', '--datadir=/home/eth/.ethereum', '--rpc', '--unlock=0', '--password='+passwordFileName, ipcpath/*, '--rpcapi=db,eth,net,web3,personal', '--rpcport=8545', '--rpcaddr=localhost'*/]); 
-    //geth.stdout.on('data', data=>{
-    //});
-    /*geth.stderr.on( 'data', data => { //for some reason Geth prints to stderr....
-        data=""+data;
-        console.log(data);
-        var indexOfImported=data.indexOf("imported");
-        var indexOfUnlocked=data.indexOf("Unlocked account");
-        //var indexOfServer=data.indexOf("Starting Server");
-        if(indexOfImported>0 && !isOpen) {
-            console.log("open");
-            runWeb3();
-            isOpen=true;
-        }
-        else if (indexOfUnlocked>0){
-            console.log("Address unlocked: "+data.substring(indexOfUnlocked+"Unlocked account".length+1));
-        }
-    });*/
 }
 function runWeb3(){
     web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
