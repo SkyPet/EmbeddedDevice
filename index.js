@@ -12,7 +12,7 @@ const web3=new Web3();
 const port=3500;
 const spawn = require( 'child_process' ).spawn;
 const exec = require( 'child_process' ).exec;
-const contractAddress='0x69De4ADbb566c1c68e8dB1274229adA4A3D9f8A8';
+const contractAddress='0x72c1bba9cabab4040c285159c8ea98fd36372858';
 const passwordFileName='pswd.txt';
 const testing=true;
 
