@@ -73,11 +73,11 @@ sPort.on('data', (data)=>{
     } 
 });
 var pswd=path.join(__dirname, passwordFileName);
-var datadir='--datadir "/home/eth/.ethereum"';
-var ipcpath='--ipcpath=/home/eth/.ethereum/geth.ipc';
+var datadir='--datadir "/home/.ethereum/geth/lightchaindata"';
+var ipcpath='--ipcpath=/home/.ethereum/geth.ipc';
 if(testing){
-    datadir='--datadir "/home/eth/.ethereum/testnet"';
-    ipcpath='/home/eth/.ethereum/testnet/geth.ipc'
+    datadir='--datadir "/home/.ethereum/testnet/geth/lightchaindata"';
+    ipcpath='/home/.ethereum/testnet/geth.ipc'
 }
 checkPswd();
 function checkPswd(){
@@ -121,7 +121,7 @@ function runGeth(password){
 }
 function runWeb3(){
     web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
-    var abi =[{"constant":true,"inputs":[{"name":"","type":"bytes32"}],"name":"trackNumberRecords","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"constant":false,"inputs":[{"name":"_petid","type":"bytes32"},{"name":"_type","type":"uint256"},{"name":"_attribute","type":"string"},{"name":"_isEncrypted","type":"bool"}],"name":"addAttribute","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"kill","outputs":[],"type":"function"},{"constant":false,"inputs":[],"name":"getRevenue","outputs":[],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"bytes32"},{"name":"","type":"uint256"}],"name":"pet","outputs":[{"name":"timestamp","type":"uint256"},{"name":"typeAttribute","type":"uint256"},{"name":"attributeText","type":"string"},{"name":"isEncrypted","type":"bool"}],"type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"type":"function"},{"constant":true,"inputs":[],"name":"costToAdd","outputs":[{"name":"","type":"uint256"}],"type":"function"},{"inputs":[],"type":"constructor"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_petid","type":"bytes32"},{"indexed":false,"name":"_type","type":"uint256"}],"name":"attributeAdded","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_petid","type":"bytes32"},{"indexed":false,"name":"error","type":"string"}],"name":"attributeError","type":"event"}];
+    var abi =[{"constant":false,"inputs":[],"name":"kill","outputs":[],"payable":false,"type":"function"},{"constant":false,"inputs":[],"name":"getRevenue","outputs":[],"payable":true,"type":"function"},{"constant":true,"inputs":[{"name":"_petid","type":"bytes32"},{"name":"index","type":"uint256"}],"name":"getAttribute","outputs":[{"name":"","type":"uint256"},{"name":"","type":"string"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"type":"function"},{"constant":true,"inputs":[],"name":"costToAdd","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"_petid","type":"bytes32"}],"name":"getNumberOfAttributes","outputs":[{"name":"","type":"uint256"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"_petid","type":"bytes32"},{"name":"_attribute","type":"string"}],"name":"addAttribute","outputs":[],"payable":true,"type":"function"},{"inputs":[],"type":"constructor"},{"payable":false,"type":"fallback"},{"anonymous":false,"inputs":[{"indexed":false,"name":"_petid","type":"bytes32"},{"indexed":false,"name":"_attribute","type":"string"}],"name":"attributeAdded","type":"event"}];
     
     if(web3.eth.accounts.length>0){
         web3.eth.defaultAccount=web3.eth.accounts[0];
@@ -148,7 +148,9 @@ function addAttribute(attributeType, attributeValue, addedEncryption){
         wss.broadcast(JSON.stringify({error:"Not enough Ether!"}));
         return;
     }
-    contract.addAttribute.sendTransaction(hashId, attributeType, CryptoJS.AES.encrypt(attributeValue, unHashedId).toString(), addedEncryption, {value:contract.costToAdd(), gas:3000000}, (err, results)=>{
+    var obj={};
+    obj[attributeType]=attributeValue;
+    contract.addAttribute.sendTransaction(hashId, JSON.stringify(obj), CryptoJS.AES.encrypt(attributeValue, unHashedId).toString()/*, addedEncryption*/, {value:contract.costToAdd(), gas:3000000}, (err, results)=>{
         if(err){
             console.log(err);
             console.log(results);
@@ -157,13 +159,13 @@ function addAttribute(attributeType, attributeValue, addedEncryption){
             console.log(results);
         }
     });
-    contract.attributeError({_petid:hashId}, (error, result)=>{
+    /*contract.attributeError({_petid:hashId}, (error, result)=>{
         if(error){
             console.log(error);
             return;
         }
         console.log(result);
-    });
+    });*/
     contract.attributeAdded({_petid:hashId}, (error, result)=>{
         if(error){
             console.log(error);
