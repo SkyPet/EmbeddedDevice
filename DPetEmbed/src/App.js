@@ -210,7 +210,20 @@ class App extends Component {
     var obj={};
     obj[this.state.attributeType]=attVal;
     obj.addedEncryption=this.state.addedEncryption;
-    this.state.socket.send(JSON.stringify(obj));
+    if(this.state.moneyInAccount>this.state.cost){
+      //var currData=this.state.historicalData;
+      this.state.socket.send(JSON.stringify(obj));
+      this.setState({
+        historicalData:this.state.historicalData.concat([{timestamp:new Date(), attributeText:attVal, attributeType:this.state.attributeType, isEncrypted:this.state.addedEncryption}])
+      },()=>{
+        this.messageTypes.retrievedData(this.state.historicalData);
+      });
+      
+    }
+    else{
+      alert("Not enough money");
+    }
+    
   }
   showModal(){
     this.setState({
