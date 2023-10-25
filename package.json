@@ -4,7 +4,7 @@
   "description": "Decentralized app for tracking pet records using IOT embedded device",
   "main": "index.js",
   "dependencies": {
-    "crypto-js": "^3.2.1",
+    "crypto-js": "^4.2.0",
     "express": "^4.17.3",
     "fs-extra": "^0.30.0",
     "node-uuid": "^1.4.7",
